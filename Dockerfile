@@ -12,6 +12,6 @@ FROM alpine:latest
 
 WORKDIR /app
 
-COPY --from=builder /bin/technical-writer ./technical-writer
+COPY --from=builder /bin/technical-writer /bin/technical-writer
 
-CMD ["./technical-writer"]
+ENTRYPOINT ["/bin/technical-writer"]
