@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/sashabaranov/go-openai"
+	"golang.org/x/sync/errgroup"
 )
 
 func main() {
@@ -20,11 +21,15 @@ func main() {
 	}
 
 	ctx := context.Background()
+	eg := errgroup.Group{}
 	for _, file := range files {
-		err = document(ctx, client, file)
-		if err != nil {
-			panic(err.Error())
-		}
+		file := file
+		eg.Go(func() error {
+			return document(ctx, client, file)
+		})
+	}
+	if err = eg.Wait(); err != nil {
+		panic(err.Error())
 	}
 
 	fmt.Println(files)
@@ -62,6 +67,12 @@ func listAllFiles(dir string) ([]string, error) {
 }
 
 func document(ctx context.Context, client *openai.Client, file string) error {
+	fmt.Println("Documenting " + file + "...")
+	failed := "Documenting " + file + " failed"
+	defer func() {
+		fmt.Println(failed)
+	}()
+
 	contents, err := os.ReadFile(file)
 	if err != nil {
 		return err
@@ -91,5 +102,6 @@ func document(ctx context.Context, client *openai.Client, file string) error {
 		return err
 	}
 
+	failed = "Documented " + file + " successfully"
 	return nil
 }

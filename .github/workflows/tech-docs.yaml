@@ -16,6 +16,10 @@ jobs:
         with:
           openai_api_key: ${{ secrets.OPENAI_API_KEY }}
 
+      - run: |
+          pwd
+          ls -lah
+
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v5
         with:
@@ -24,5 +28,4 @@ jobs:
           title: 'Documentation Update'
           body: 'Documentation Update'
           branch: 'docs/technical-writer'
-          delete-branch: true
           base: dev
