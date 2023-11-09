@@ -98,6 +98,7 @@ func document(ctx context.Context, client *openai.Client, files []string) error 
 		if err != nil {
 			return err
 		}
+		req.Messages = append(req.Messages, chat.Choices[0].Message)
 
 		fmt.Println(chat.Choices[0])
 
