@@ -25,3 +25,4 @@ jobs:
           body: 'Documentation Update'
           branch: 'docs/technical-writer'
           delete-branch: true
+          base: dev
