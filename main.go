@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"os"
 
@@ -59,7 +60,35 @@ func listAllFiles(dir string) ([]string, error) {
 	return files, nil
 }
 
-func document(file string) error {
-	fmt.Println(file)
+func document(ctx context.Context, client openai.Client, file string) error {
+	contents, err := os.ReadFile(file)
+	if err != nil {
+		return err
+	}
+
+	chat, err := client.CreateChatCompletion(ctx, openai.ChatCompletionRequest{
+		Model: "gpt-4-1106-preview",
+		Messages: []openai.ChatCompletionMessage{
+			{
+				Role:    openai.ChatMessageRoleSystem,
+				Content: "You are a technical writer. You should supply code suggestions that increase readability for developers integrating with the code by creating comments, editing existing comments for readability and supply other suggestions that would help with developer experience.\n\nYou must reply with just the existing code edited. Don't add any other messages. Do not omit code.",
+			},
+			{
+				Role:    openai.ChatMessageRoleUser,
+				Content: string(contents),
+			},
+		},
+	})
+	if err != nil {
+		return err
+	}
+
+	newContents := chat.Choices[0].Message.Content
+
+	err = os.WriteFile(file, []byte(newContents), 0644)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
