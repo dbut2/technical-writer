@@ -20,6 +20,8 @@ func main() {
 		panic(err.Error())
 	}
 
+	files = files[:1]
+
 	ctx := context.Background()
 	eg := errgroup.Group{}
 	for _, file := range files {
