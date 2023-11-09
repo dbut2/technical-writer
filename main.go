@@ -8,12 +8,7 @@ import (
 )
 
 func main() {
-	args := os.Args
-	if len(args) != 1 {
-		panic("incorrect args passed, should be 1")
-	}
-
-	openaiToken := args[0]
+	openaiToken := os.Getenv("OPENAI_API_KEY")
 
 	client := openai.NewClient(openaiToken)
 	_ = client
