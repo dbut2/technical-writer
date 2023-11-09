@@ -1,3 +1,6 @@
+// Package main is the entry point for the Technical Writer application.
+// This program processes project files and leverages the OpenAI API to
+// automatically generate documentation for those files.
 package main
 
 import (
@@ -9,6 +12,8 @@ import (
 	"github.com/sashabaranov/go-openai"
 )
 
+// instruction provides guidance for the Technical Writer application on how
+// to interact with files and respond to the OpenAI API.
 const instruction = `You are a technical writer. 
 
 Your job is to supply package level documentation that would ease an external developer to understand the program. You might also suggest creating a README.md file if you think it is necessary.
@@ -19,23 +24,26 @@ If you think a change should be made to the file you should reply with the entir
 
 If you do not wish to edit any more files, simply reply "STOP".`
 
+// main is the entry point of the application.
 func main() {
-	openaiToken := os.Getenv("OPENAI_API_KEY")
+	openaiToken := os.Getenv("OPENAI_API_KEY") // Load the OpenAI API key from environment variables.
 
-	client := openai.NewClient(openaiToken)
+	client := openai.NewClient(openaiToken) // Create a new OpenAI client.
 	_ = client
 
-	files, err := listAllFiles("/github/workspace")
+	files, err := listAllFiles("/github/workspace") // List all files in the specified directory.
 	if err != nil {
-		panic(err.Error())
+		panic(err.Error()) // Handle potential errors during file listing.
 	}
 
-	err = document(context.Background(), client, files)
+	err = document(context.Background(), client, files) // Begin the documentation process for each file.
 	if err != nil {
-		panic(err.Error())
+		panic(err.Error()) // Handle potential errors during the documentation process.
 	}
 }
 
+// listAllFiles recursively lists all files within the given directory, while
+// avoiding version control directories that start with ".".
 func listAllFiles(dir string) ([]string, error) {
 	var files []string
 
@@ -71,6 +79,8 @@ func listAllFiles(dir string) ([]string, error) {
 	return files, nil
 }
 
+// document interacts with the OpenAI API to generate and apply
+// documentation to each file in the provided list.
 func document(ctx context.Context, client *openai.Client, files []string) error {
 	req := openai.ChatCompletionRequest{
 		Model: "gpt-4-1106-preview",
@@ -88,14 +98,14 @@ func document(ctx context.Context, client *openai.Client, files []string) error 
 			return err
 		}
 
-		req.Messages = append(req.Messages, openai.ChatCompletionMessage{
+		req.Messages = append(req.Messages, openai.ChatCompletionMessage{ // Append a message for each file.
 			Role:    openai.ChatMessageRoleUser,
 			Content: fmt.Sprintf("```%s\n%s\n```", file, contents),
 		})
 	}
 
 	for {
-		chat, err := client.CreateChatCompletion(ctx, req)
+		chat, err := client.CreateChatCompletion(ctx, req) // Send a chat completion request to OpenAI.
 		if err != nil {
 			return err
 		}
@@ -107,7 +117,7 @@ func document(ctx context.Context, client *openai.Client, files []string) error 
 
 		file, contents := parseResponse(chat.Choices[0].Message.Content)
 
-		err = os.WriteFile(file, contents, 0644)
+		err = os.WriteFile(file, contents, 0644) // Write the updated documentation back to the file.
 		if err != nil {
 			return err
 		}
@@ -116,6 +126,8 @@ func document(ctx context.Context, client *openai.Client, files []string) error 
 	return nil
 }
 
+// parseResponse parses a documentation response from the OpenAI API
+// and extracts the filename and content to be applied to the file.
 func parseResponse(response string) (string, []byte) {
 	lines := strings.Split(response, "\n")
 	file := strings.Trim(lines[0], "`")
