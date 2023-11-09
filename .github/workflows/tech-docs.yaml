@@ -1,0 +1,15 @@
+name: Technical Writer
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  tech-docs:
+    name: Technical Docs
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dbut2/technical-writer@main
