@@ -71,12 +71,16 @@ func listAllFiles(dir string) ([]string, error) {
 	allowList := strings.Split(os.Getenv("ALLOW_LIST"), ",")
 	denyList := strings.Split(os.Getenv("DENY_LIST"), ",")
 
+	fmt.Println("Allow list: ", allowList)
+	fmt.Println("Deny list: ", denyList)
+
 	var allowedFiles []string
 	for _, file := range files {
 		allowed := false
 
 		for _, allow := range allowList {
 			if strings.Contains(file, allow) {
+				fmt.Println("Allowing file: ", file)
 				allowed = true
 				break
 			}
@@ -84,6 +88,7 @@ func listAllFiles(dir string) ([]string, error) {
 
 		for _, deny := range denyList {
 			if strings.Contains(file, deny) {
+				fmt.Println("Denying file: ", file)
 				allowed = false
 				break
 			}
