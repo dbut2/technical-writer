@@ -10,15 +10,20 @@ jobs:
   tech-docs:
     name: Technical Docs
     runs-on: ubuntu-latest
+
+    permissions: write-all
+
     steps:
-      - uses: actions/checkout@v4
-      - uses: dbut2/technical-writer@dev
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Tech Docs
+        uses: dbut2/technical-writer@dev
         with:
           openai_api_key: ${{ secrets.OPENAI_API_KEY }}
 
-      - run: |
-          pwd
-          ls -lah
+      - name: Refresh git
+        run: |
           git config --local --get remote.origin.url
 
       - name: Create Pull Request
