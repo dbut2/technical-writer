@@ -7,12 +7,15 @@ import (
 	"strings"
 
 	"github.com/sashabaranov/go-openai"
-	"golang.org/x/sync/errgroup"
 )
 
-const instruction = `You are a technical writer. You should supply code suggestions that increase readability for developers integrating with the code by creating comments, editing existing comments for readability and supply other suggestions that would help with developer experience.
+const instruction = `You are a technical writer. 
 
-You must reply with just the existing code edited. Don't add any other messages. Do not omit code. Do not reply in a code block.`
+Your job is to supply package level comments that would ease an external developer to understand the program. You might also suggest creating a README.md file if you think it is necessary.
+
+You will receive 1 message per file, where the message contains the file contains inside a code block titled with the filename.
+
+If you think a change should be made to the file you should reply with the entire file returned with comments added, and if you want to create a file you should add a new code block with that file titled with the new files filename. Do not omit code when editing a block. Do not add any other message outside of the code blocks.`
 
 func main() {
 	openaiToken := os.Getenv("OPENAI_API_KEY")
@@ -25,19 +28,10 @@ func main() {
 		panic(err.Error())
 	}
 
-	ctx := context.Background()
-	eg := errgroup.Group{}
-	for _, file := range files {
-		file := file
-		eg.Go(func() error {
-			return document(ctx, client, file)
-		})
-	}
-	if err = eg.Wait(); err != nil {
+	err = document(context.Background(), client, files)
+	if err != nil {
 		panic(err.Error())
 	}
-
-	fmt.Println(files)
 }
 
 func listAllFiles(dir string) ([]string, error) {
@@ -75,42 +69,43 @@ func listAllFiles(dir string) ([]string, error) {
 	return files, nil
 }
 
-func document(ctx context.Context, client *openai.Client, file string) error {
-	fmt.Println("Documenting " + file + "...")
-	failed := "Documenting " + file + " failed"
-	defer func() {
-		fmt.Println(failed)
-	}()
+func document(ctx context.Context, client *openai.Client, files []string) error {
 
-	contents, err := os.ReadFile(file)
-	if err != nil {
-		return err
-	}
-
-	chat, err := client.CreateChatCompletion(ctx, openai.ChatCompletionRequest{
+	req := openai.ChatCompletionRequest{
 		Model: "gpt-4-1106-preview",
-		Messages: []openai.ChatCompletionMessage{
+		Messages: append([]openai.ChatCompletionMessage{
 			{
 				Role:    openai.ChatMessageRoleSystem,
 				Content: instruction,
 			},
-			{
-				Role:    openai.ChatMessageRoleUser,
-				Content: string(contents),
-			},
-		},
-	})
-	if err != nil {
-		return err
+		}),
 	}
 
-	newContents := chat.Choices[0].Message.Content
+	for _, file := range files {
+		contents, err := os.ReadFile(file)
+		if err != nil {
+			return err
+		}
 
-	err = os.WriteFile(file, []byte(newContents), 0644)
-	if err != nil {
-		return err
+		req.Messages = append(req.Messages, openai.ChatCompletionMessage{
+			Role:    openai.ChatMessageRoleUser,
+			Content: fmt.Sprintf("```%s\n%s\n```", file, contents),
+		})
 	}
 
-	failed = "Documented " + file + " successfully"
+	for i := 0; i < 10; i++ {
+		chat, err := client.CreateChatCompletion(ctx, req)
+		if err != nil {
+			return err
+		}
+
+		fmt.Println(chat.Choices[0])
+
+		//err = os.WriteFile(file, []byte(newContents), 0644)
+		//if err != nil {
+		//	return err
+		//}
+	}
+
 	return nil
 }
