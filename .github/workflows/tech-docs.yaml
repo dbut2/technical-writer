@@ -19,6 +19,7 @@ jobs:
       - run: |
           pwd
           ls -lah
+          git config --local --get remote.origin.url
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v5
