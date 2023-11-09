@@ -19,8 +19,9 @@ func main() {
 		panic(err.Error())
 	}
 
+	ctx := context.Background()
 	for _, file := range files {
-		err = document(file)
+		err = document(ctx, client, file)
 		if err != nil {
 			panic(err.Error())
 		}
@@ -60,7 +61,7 @@ func listAllFiles(dir string) ([]string, error) {
 	return files, nil
 }
 
-func document(ctx context.Context, client openai.Client, file string) error {
+func document(ctx context.Context, client *openai.Client, file string) error {
 	contents, err := os.ReadFile(file)
 	if err != nil {
 		return err
