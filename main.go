@@ -76,7 +76,35 @@ func listAllFiles(dir string) ([]string, error) {
 		}
 	}
 
-	return files, nil
+	allowList := strings.Split(os.Getenv("ALLOW_LIST"), ",")
+	denyList := strings.Split(os.Getenv("DENY_LIST"), ",")
+
+	var allowedFiles []string
+	for _, file := range files {
+		allowed := false
+
+		for _, allow := range allowList {
+			if strings.Contains(file, allow) {
+				allowed = true
+				break
+			}
+		}
+
+		for _, deny := range denyList {
+			if strings.Contains(file, deny) {
+				allowed = false
+				break
+			}
+		}
+
+		if !allowed {
+			continue
+		}
+
+		allowedFiles = append(allowedFiles, file)
+	}
+
+	return allowedFiles, nil
 }
 
 // document interacts with the OpenAI API to generate and apply
