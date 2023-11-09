@@ -103,7 +103,7 @@ func listAllFiles(dir string) ([]string, error) {
 
 	fmt.Println(allowedFiles)
 
-	return files, nil
+	return allowedFiles, nil
 }
 
 func document(ctx context.Context, client *openai.Client, files []string) error {
