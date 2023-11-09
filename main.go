@@ -94,12 +94,16 @@ func document(ctx context.Context, client *openai.Client, files []string) error 
 		})
 	}
 
-	for i := 0; i < 10; i++ {
+	for {
 		chat, err := client.CreateChatCompletion(ctx, req)
 		if err != nil {
 			return err
 		}
 		req.Messages = append(req.Messages, chat.Choices[0].Message)
+
+		if chat.Choices[0].Message.Content == "STOP" {
+			break
+		}
 
 		file, contents := parseResponse(chat.Choices[0].Message.Content)
 
