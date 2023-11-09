@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-  pull_request:
 
 jobs:
   tech-docs:
@@ -34,4 +33,4 @@ jobs:
           title: 'Documentation Update'
           body: 'Documentation Update'
           branch: 'docs/technical-writer'
-          base: dev
+          base: main
