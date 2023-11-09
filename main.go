@@ -101,6 +101,8 @@ func listAllFiles(dir string) ([]string, error) {
 		allowedFiles = append(allowedFiles, file)
 	}
 
+	fmt.Println(allowedFiles)
+
 	return files, nil
 }
 
