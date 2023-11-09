@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/sashabaranov/go-openai"
 	"golang.org/x/sync/errgroup"
@@ -55,6 +56,10 @@ func listAllFiles(dir string) ([]string, error) {
 		fullPath := dir + "/" + fileInfo.Name()
 
 		if fileInfo.IsDir() {
+			if strings.Contains(fileInfo.Name(), ".") {
+				continue
+			}
+
 			subFiles, err := listAllFiles(fullPath)
 			if err != nil {
 				return nil, err
