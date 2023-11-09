@@ -10,6 +10,10 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
+const instruction = `You are a technical writer. You should supply code suggestions that increase readability for developers integrating with the code by creating comments, editing existing comments for readability and supply other suggestions that would help with developer experience.
+
+You must reply with just the existing code edited. Don't add any other messages. Do not omit code. Do not reply in a code block.`
+
 func main() {
 	openaiToken := os.Getenv("OPENAI_API_KEY")
 
@@ -20,8 +24,6 @@ func main() {
 	if err != nil {
 		panic(err.Error())
 	}
-
-	files = files[:1]
 
 	ctx := context.Background()
 	eg := errgroup.Group{}
@@ -90,7 +92,7 @@ func document(ctx context.Context, client *openai.Client, file string) error {
 		Messages: []openai.ChatCompletionMessage{
 			{
 				Role:    openai.ChatMessageRoleSystem,
-				Content: "You are a technical writer. You should supply code suggestions that increase readability for developers integrating with the code by creating comments, editing existing comments for readability and supply other suggestions that would help with developer experience.\n\nYou must reply with just the existing code edited. Don't add any other messages. Do not omit code.",
+				Content: instruction,
 			},
 			{
 				Role:    openai.ChatMessageRoleUser,
