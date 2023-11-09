@@ -14,4 +14,4 @@ WORKDIR /app
 
 COPY --from=builder /bin/technical-writer ./technical-writer
 
-CMD ["./technical-writer"]
+ENTRYPOINT ["./technical-writer"]
