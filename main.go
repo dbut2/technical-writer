@@ -43,14 +43,16 @@ func listAllFiles(dir string) ([]string, error) {
 	}
 
 	for _, fileInfo := range fileInfos {
+		fullPath := dir + "/" + fileInfo.Name()
+
 		if fileInfo.IsDir() {
-			subFiles, err := listAllFiles(fileInfo.Name())
+			subFiles, err := listAllFiles(fullPath)
 			if err != nil {
 				return nil, err
 			}
 			files = append(files, subFiles...)
 		} else {
-			files = append(files, dir+"/"+fileInfo.Name())
+			files = append(files, fullPath)
 		}
 	}
 
