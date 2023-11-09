@@ -58,7 +58,7 @@ func listAllFiles(dir string) ([]string, error) {
 		fullPath := dir + "/" + fileInfo.Name()
 
 		if fileInfo.IsDir() {
-			if strings.Contains(fileInfo.Name(), ".") {
+			if strings.HasPrefix(fileInfo.Name(), ".") {
 				continue
 			}
 
