@@ -4,8 +4,16 @@ inputs:
   openai_api_key:
     description: 'OpenAI API key'
     required: true
+  allow_list:
+    description: 'Allow list of files'
+    required: false
+  deny_list:
+    description: 'Deny list of files'
+    required: false
 runs:
   using: 'docker'
   image: 'Dockerfile'
   env:
     OPENAI_API_KEY: ${{ inputs.openai_api_key }}
+    ALLOW_LIST: ${{ inputs.allow_list }}
+    DENY_LIST: ${{ inputs.deny_list }}
